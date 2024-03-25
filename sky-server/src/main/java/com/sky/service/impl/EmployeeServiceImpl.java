@@ -1,16 +1,20 @@
 package com.sky.service.impl;
 
+import com.github.pagehelper.Page;
+import com.github.pagehelper.PageHelper;
 import com.sky.constant.MessageConstant;
 import com.sky.constant.PasswordConstant;
 import com.sky.constant.StatusConstant;
 import com.sky.context.BaseContext;
 import com.sky.dto.EmployeeDTO;
 import com.sky.dto.EmployeeLoginDTO;
+import com.sky.dto.EmployeePageQueryDTO;
 import com.sky.entity.Employee;
 import com.sky.exception.AccountLockedException;
 import com.sky.exception.AccountNotFoundException;
 import com.sky.exception.PasswordErrorException;
 import com.sky.mapper.EmployeeMapper;
+import com.sky.result.PageResult;
 import com.sky.service.EmployeeService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -71,7 +75,7 @@ public class EmployeeServiceImpl implements EmployeeService {
      * @return
      */
     @Override
-    public boolean save(EmployeeDTO employeeDTO) {
+    public void save(EmployeeDTO employeeDTO) {
         Employee employee = new Employee();
 
         //对象属性拷贝
@@ -93,7 +97,41 @@ public class EmployeeServiceImpl implements EmployeeService {
         employee.setUpdateUser(BaseContext.getCurrentId());
 
 
-        return employeeMapper.insert(employee) == 1;
+        employeeMapper.insert(employee);
+    }
+
+    /**
+     * 员工分页查询
+     *
+     * @param employeePageQueryDTO
+     * @return
+     */
+    @Override
+    public PageResult pageQuery(EmployeePageQueryDTO employeePageQueryDTO) {
+        //开始分页查询
+
+        //底层是将页码和页面数据个数 放入TreadLocal 中 在mapper映射文件中取出
+        //添加这个后会自动再map映射文件的sql语句中自动添加limit 页码 ，页面数据个数
+        PageHelper.startPage(employeePageQueryDTO.getPage(), employeePageQueryDTO.getPageSize());
+
+        //用了上面的插件后要遵循其规范 Mapper 接口返回的类型必须是 Page<T>
+        Page<Employee> employeePage = employeeMapper.pageQuery(employeePageQueryDTO);
+
+        return new PageResult(employeePage.getTotal(), employeePage.getResult());
+    }
+
+    /**
+     * 禁用启用员工账号
+     *
+     * @param status
+     * @param id
+     */
+    @Override
+    public void startOrStop(Integer status, Long id) {
+        //这里将employee对象传给dao dao对数据进行动态拼接，这样以后修改都通过一个动态sql语句 从而提高了代码的服用性
+        Employee employee = Employee.builder().status(status).id(id).build();
+
+        employeeMapper.update(employee);
     }
 
 

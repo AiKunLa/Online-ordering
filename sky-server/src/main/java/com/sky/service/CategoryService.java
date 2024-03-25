@@ -1,6 +1,8 @@
 package com.sky.service;
 
 import com.sky.dto.CategoryDTO;
+import com.sky.dto.CategoryPageQueryDTO;
+import com.sky.result.PageResult;
 
 public interface CategoryService {
 
@@ -15,4 +17,17 @@ public interface CategoryService {
      * @param categoryDTO
      */
     void update(CategoryDTO categoryDTO);
+
+    /**
+     * 通过id删除分类
+     * @param id
+     */
+    void deleteById(Long id);
+
+    /**
+     *
+     * @param categoryPageQueryDTO
+     * @return
+     */
+    PageResult pageQuery(CategoryPageQueryDTO categoryPageQueryDTO);
 }

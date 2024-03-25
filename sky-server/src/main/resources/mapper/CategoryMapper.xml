@@ -35,4 +35,14 @@
         </set>
         where id = #{id}
     </update>
+
+    <select id="pageQuery" resultType="com.sky.entity.Category">
+        select * from category
+        <where>
+            <if test="type != null and type != ''">
+                and type = #{type}
+            </if>
+        </where>
+        order by sort desc
+    </select>
 </mapper>

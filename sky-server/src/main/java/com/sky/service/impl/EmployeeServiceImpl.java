@@ -120,6 +120,7 @@ public class EmployeeServiceImpl implements EmployeeService {
         return new PageResult(employeePage.getTotal(), employeePage.getResult());
     }
 
+
     /**
      * 禁用启用员工账号
      *
@@ -130,6 +131,36 @@ public class EmployeeServiceImpl implements EmployeeService {
     public void startOrStop(Integer status, Long id) {
         //这里将employee对象传给dao dao对数据进行动态拼接，这样以后修改都通过一个动态sql语句 从而提高了代码的服用性
         Employee employee = Employee.builder().status(status).id(id).build();
+
+        employeeMapper.update(employee);
+    }
+
+
+    /**
+     * 通过id查询员工信息
+     *
+     * @param id
+     * @return
+     */
+    @Override
+    public Employee getById(Integer id) {
+        return employeeMapper.getById(id);
+    }
+
+
+    /**
+     * 编辑员工信息
+     *
+     * @param employeeDTO
+     */
+    @Override
+    public void update(EmployeeDTO employeeDTO) {
+        Employee employee = new Employee();
+        BeanUtils.copyProperties(employeeDTO, employee);
+
+        //设置 修改人的id和修改时间
+        employee.setUpdateUser(BaseContext.getCurrentId());
+        employee.setUpdateTime(LocalDateTime.now());
 
         employeeMapper.update(employee);
     }

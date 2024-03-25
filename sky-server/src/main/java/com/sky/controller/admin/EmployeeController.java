@@ -125,4 +125,36 @@ public class EmployeeController {
 
         return Result.success();
     }
+
+
+    /**
+     * 通过id查询员工信息
+     *
+     * @param id
+     * @return
+     */
+    @ApiOperation(value = "通过id查询员工信息")
+    @GetMapping("/{id}")
+    public Result<Employee> getById(@PathVariable Integer id) {
+        log.info("通过id查询员工信息，{}", id);
+        Employee employee = employeeService.getById(id);
+        employee.setPassword("******");
+        return Result.success(employee);
+    }
+
+
+    /**
+     * 编辑员工信息
+     * @param employeeDTO
+     * @return
+     */
+    @ApiOperation(value = "编辑员工信息")
+    @PutMapping
+    public Result update(@RequestBody EmployeeDTO employeeDTO) {
+        log.info("通过id查询员工信息，{}", employeeDTO);
+        employeeService.update(employeeDTO);
+        return Result.success();
+    }
+
+
 }

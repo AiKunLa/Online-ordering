@@ -2,6 +2,7 @@ package com.sky.service.impl;
 
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
+import com.sky.constant.StatusConstant;
 import com.sky.context.BaseContext;
 import com.sky.dto.CategoryDTO;
 import com.sky.dto.CategoryPageQueryDTO;
@@ -14,7 +15,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
+/**
+ * 分类相关业务
+ */
 @Service
 public class CategoryServiceImpl implements CategoryService {
     @Autowired
@@ -39,7 +44,7 @@ public class CategoryServiceImpl implements CategoryService {
         category.setUpdateUser(BaseContext.getCurrentId());
 
         //设置初始类别状态 1  0
-        category.setStatus(1);
+        category.setStatus(StatusConstant.DISABLE);
 
         categoryMapper.insert(category);
     }
@@ -83,5 +88,27 @@ public class CategoryServiceImpl implements CategoryService {
         Page<Category> categoryPage = categoryMapper.pageQuery(categoryPageQueryDTO);
 
         return new PageResult(categoryPage.getTotal(), categoryPage.getResult());
+    }
+
+    /**
+     * 启用、禁用分类
+     *
+     * @param status
+     * @param id
+     */
+    @Override
+    public void startOrStop(Integer status, Long id) {
+        Category category = Category.builder().id(id).status(status).build();
+        categoryMapper.update(category);
+    }
+
+    /**
+     * 根据类型查询分类
+     * @param type
+     * @return
+     */
+    @Override
+    public List<Category> list(Integer type) {
+        return categoryMapper.list(type);
     }
 }

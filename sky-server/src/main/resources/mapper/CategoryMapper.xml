@@ -5,6 +5,15 @@
 
 <mapper namespace="com.sky.mapper.CategoryMapper">
 
+    <select id="pageQuery" resultType="com.sky.entity.Category">
+        select * from category
+        <where>
+            <if test="name != null and name != ''"> and name like concat('%',#{name},'%') </if>
+            <if test="type != null"> and type = #{type} </if>
+        </where>
+        order by sort asc , create_time desc
+    </select>
+
     <update id="update" parameterType="com.sky.entity.Category">
         update category
         <set>
@@ -36,13 +45,13 @@
         where id = #{id}
     </update>
 
-    <select id="pageQuery" resultType="com.sky.entity.Category">
+    <select id="list" resultType="com.sky.entity.Category">
         select * from category
         <where>
             <if test="type != null and type != ''">
                 and type = #{type}
             </if>
         </where>
-        order by sort desc
+        order by sort asc ,create_time asc
     </select>
 </mapper>

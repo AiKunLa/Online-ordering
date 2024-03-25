@@ -2,14 +2,18 @@ package com.sky.controller.admin;
 
 import com.sky.dto.CategoryDTO;
 import com.sky.dto.CategoryPageQueryDTO;
+import com.sky.entity.Category;
 import com.sky.result.PageResult;
 import com.sky.result.Result;
 import com.sky.service.CategoryService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import io.swagger.models.auth.In;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 /**
  * 分类类管理
@@ -77,6 +81,34 @@ public class CategoryController {
         log.info("分类分页查询: {}", categoryPageQueryDTO);
         PageResult pageResult = categoryService.pageQuery(categoryPageQueryDTO);
         return Result.success(pageResult);
+    }
+
+    /**
+     * 启用、禁用分类
+     *
+     * @param status
+     * @param id
+     * @return
+     */
+    @ApiOperation(value = "启用、禁用分类")
+    @PostMapping("status/{status}")
+    public Result startOrStop(@PathVariable Integer status, Long id) {
+        log.info("启用、禁用分类: {},{}", status, id);
+        categoryService.startOrStop(status, id);
+        return Result.success();
+    }
+
+    /**
+     * 根据类型查询分类
+     * @param type
+     * @return
+     */
+    @ApiOperation(value = "根据类型查询分类")
+    @GetMapping("/list")
+    public Result<List<Category>> list(Integer type) {
+        log.info("根据类型查询分类: {}", type);
+        List<Category> categories = categoryService.list(type);
+        return Result.success(categories);
     }
 
 }

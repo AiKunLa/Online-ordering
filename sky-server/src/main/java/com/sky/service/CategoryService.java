@@ -4,6 +4,7 @@ import com.sky.dto.CategoryDTO;
 import com.sky.dto.CategoryPageQueryDTO;
 import com.sky.entity.Category;
 import com.sky.result.PageResult;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
 

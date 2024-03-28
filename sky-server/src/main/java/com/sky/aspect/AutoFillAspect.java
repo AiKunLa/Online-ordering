@@ -57,6 +57,7 @@ public class AutoFillAspect {
                 Method setUpdateTime = object.getClass().getDeclaredMethod(AutoFillConstant.SET_UPDATE_TIME, LocalDateTime.class);
                 Method setCreateUser = object.getClass().getDeclaredMethod(AutoFillConstant.SET_CREATE_USER, Long.class);
                 Method setUpdateUser = object.getClass().getDeclaredMethod(AutoFillConstant.SET_UPDATE_USER, Long.class);
+
                 //通过反射调用对象方法
                 setCreateTime.invoke(object,time);
                 setUpdateTime.invoke(object,time);

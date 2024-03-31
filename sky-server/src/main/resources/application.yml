@@ -16,6 +16,10 @@ spring:
   web:
     resources:
       static-locations: resource/static/
+  redis:
+    host: ${sky.redis.host}
+    port: ${sky.redis.port}
+    database: ${sky.redis.database}
 
 mybatis:
   #mapper配置文件
@@ -41,8 +45,19 @@ sky:
     admin-ttl: 7200000
     # 设置前端传递过来的令牌名称
     admin-token-name: token
+    # 设置用户端jwt
+    user-secret-key: gwk
+    # jwt过期时间
+    user-ttl: 7200000
+    # 设置前端传递过来的令牌名称
+    user-token-name: authentication
   alioss:
     endpoint: ${sky.alioss.endpoint}
     access-key-id: ${sky.alioss.access-key-id}
     access-key-secret: ${sky.alioss.access-key-secret}
     bucket-name: ${sky.alioss.bucket-name}
+
+  #微信小程序的id和密钥
+  wechat:
+    appid: ${sky.wechat.appid}
+    secret: ${sky.wechat.secret}

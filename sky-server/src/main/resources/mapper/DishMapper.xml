@@ -11,7 +11,7 @@
                 and d.name like concat('%',#{name},'%')
             </if>
             <if test="categoryId != null">
-                and category_id = #{categoryId}
+                and d.category_id = #{categoryId}
             </if>
             <if test="status != null">
                 and d.status = #{status}
@@ -72,4 +72,18 @@
             </foreach>
     </delete>
 
+    <select id="list" resultType="com.sky.vo.DishVO">
+        select * from dish 
+        <where>
+            <if test="categoryId != null">
+                and category_id = #{categoryId}
+            </if>
+            <if test="price != null">
+                and price = #{price}
+            </if>
+            <if test="status != null">
+                and status = #{status}
+            </if>
+        </where>
+    </select>
 </mapper>

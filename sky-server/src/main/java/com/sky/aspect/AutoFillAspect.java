@@ -10,10 +10,14 @@ import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
+import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Method;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 
 @Aspect
@@ -22,13 +26,14 @@ import java.time.LocalDateTime;
 public class AutoFillAspect {
 
     /**
-     *切入点
+     * 切入点
      */
     @Pointcut("execution(* com.sky.mapper.*.*(..)) && @annotation(com.sky.annotation.AutoFill)")
-    public void autoFillPointCut(){}
+    public void autoFillPointCut() {
+    }
 
     @Before("autoFillPointCut()")
-    public void autoFill(JoinPoint joinPoint){
+    public void autoFill(JoinPoint joinPoint) {
         log.info("公共字段填充...");
 
         //获取方法签名对象
@@ -45,12 +50,29 @@ public class AutoFillAspect {
         if (args == null || args.length == 0) return;
         //获取第一个参数 其实只有一个也就是实体类
         Object object = args[0];
+
+        if (object instanceof List<?>){
+            List<Object> lists = new ArrayList<>(Arrays.asList(object));
+            lists.forEach(list-> timeAndUserFill(list,operationType));
+        }else {
+            timeAndUserFill(object,operationType);
+        }
+
+
+    }
+
+    /**
+     * 填充时间和修改用户
+     * @param object
+     * @param operationType
+     */
+    public void timeAndUserFill(Object object, OperationType operationType) {
         //系统当前时间
         LocalDateTime time = LocalDateTime.now();
         //当前操作的员工id
         Long empId = BaseContext.getCurrentId();
 
-        if (operationType == OperationType.INSERT){
+        if (operationType == OperationType.INSERT) {
             try {
                 //获取对象方法
                 Method setCreateTime = object.getClass().getDeclaredMethod(AutoFillConstant.SET_CREATE_TIME, LocalDateTime.class);
@@ -59,22 +81,25 @@ public class AutoFillAspect {
                 Method setUpdateUser = object.getClass().getDeclaredMethod(AutoFillConstant.SET_UPDATE_USER, Long.class);
 
                 //通过反射调用对象方法
-                setCreateTime.invoke(object,time);
+                setCreateTime.invoke(object, time);
+                setUpdateTime.invoke(object, time);
+                setCreateUser.invoke(object, empId);
+                setUpdateUser.invoke(object, empId);
+            } catch (Exception ex) {
+                log.error("公共字段自动填充失败：{}", ex.getMessage());
+            }
+        } else {
+            try {
+                Method setUpdateTime = object.getClass().getDeclaredMethod(AutoFillConstant.SET_UPDATE_TIME, LocalDateTime.class);
+                Method setUpdateUser = object.getClass().getDeclaredMethod(AutoFillConstant.SET_UPDATE_USER, Long.class);
+
                 setUpdateTime.invoke(object,time);
-                setCreateUser.invoke(object,empId);
                 setUpdateUser.invoke(object,empId);
             } catch (Exception ex) {
                 log.error("公共字段自动填充失败：{}", ex.getMessage());
             }
-        }else {
-            try {
-                Method setUpdateTime = object.getClass().getDeclaredMethod(AutoFillConstant.SET_UPDATE_TIME, LocalDateTime.class);
-                Method setUpdateUser = object.getClass().getDeclaredMethod(AutoFillConstant.SET_UPDATE_USER, Long.class);
-            }catch (Exception ex){
-                log.error("公共字段自动填充失败：{}", ex.getMessage());
-            }
         }
-
     }
+
 }
 

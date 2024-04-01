@@ -1,6 +1,7 @@
 package com.sky.mapper;
 
 import com.sky.entity.ShoppingCart;
+import io.swagger.models.auth.In;
 import org.apache.ibatis.annotations.*;
 
 import java.util.List;
@@ -36,12 +37,6 @@ public interface ShoppingCartMapper {
             "values (#{name} ,#{image} ,#{userId} ,#{dishId} ,#{setmealId} ,#{dishFlavor} ,#{number} ,#{amount}  ,#{createTime} );")
     void insert(ShoppingCart shoppingCart);
 
-    /**
-     * 查看购物车
-     * @return
-     */
-    @Select("select * from shopping_cart")
-    List<ShoppingCart> listAll();
 
     /**
      * 清空购物车

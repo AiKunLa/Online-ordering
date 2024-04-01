@@ -48,7 +48,7 @@ public class UserController {
         //登录成功后jwt令牌
         HashMap<String, Object> claims = new HashMap<>();
         //
-        claims.put(JwtClaimsConstant.USER_ID, user.getOpenid());
+        claims.put(JwtClaimsConstant.USER_ID, user.getId());
         //key 生效时长 数据（Map）
         String jwt = JwtUtil.createJWT(jwtProperties.getUserSecretKey(),
                 jwtProperties.getUserTtl(), claims);

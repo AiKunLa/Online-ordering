@@ -6,6 +6,8 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Options;
 import org.apache.ibatis.annotations.Select;
 
+import java.time.LocalDateTime;
+
 @Mapper
 public interface UserMapper {
 
@@ -20,4 +22,10 @@ public interface UserMapper {
 
     @Select("select * from orders where user_id=#{userId} ")
     User getById(Long userId);
+
+    @Select("select count(id) from user where create_time between #{beginTime} and #{endTime}")
+    Integer newUserNum(LocalDateTime beginTime, LocalDateTime endTime);
+
+    @Select("select count(id) from user where create_time <= #{endTime} ")
+    Integer totalUserNum(LocalDateTime endTime);
 }

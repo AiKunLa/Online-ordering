@@ -20,6 +20,7 @@ import com.sky.vo.OrderPaymentVO;
 import com.sky.vo.OrderStatisticsVO;
 import com.sky.vo.OrderSubmitVO;
 import com.sky.vo.OrderVO;
+import com.sky.websocket.WebSocketServer;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,6 +56,9 @@ public class OrderServiceImpl implements OrderService {
     @Autowired
     private WeChatPayUtil weChatPayUtil;
 
+    @Autowired
+    private WebSocketServer webSocketServer;
+
     /**
      * 用户下单
      *
@@ -81,7 +85,7 @@ public class OrderServiceImpl implements OrderService {
 
         //构造订单数据
         Orders order = new Orders();
-        BeanUtils.copyProperties(ordersSubmitDTO,order);
+        BeanUtils.copyProperties(ordersSubmitDTO, order);
         order.setPhone(addressBook.getPhone());
         order.setAddress(addressBook.getDetail());
         order.setConsignee(addressBook.getConsignee());
@@ -168,10 +172,41 @@ public class OrderServiceImpl implements OrderService {
                 .build();
 
         orderMapper.update(orders);
+
+        //通过websocket向客户端浏览器推送信息 json格式 type orderid content
+        Map map = new HashMap<>();
+        map.put("type", 1);
+        map.put("orderId", orders.getId());
+        map.put("content", "订单号: " + outTradeNo);
+        String jsonString = JSON.toJSONString(map);
+        webSocketServer.sendMessageToAll(jsonString);
+
+
     }
 
     /**
-     *  用户端订单分页查询
+     * 催单
+     *
+     * @param id
+     */
+    @Override
+    public void reminder(Long id) {
+        //查询
+        Orders orders = orderMapper.getById(id);
+        if (orders == null)
+            throw new OrderBusinessException(MessageConstant.ORDER_NOT_FOUND);
+
+        Map map = new HashMap<>();
+        map.put("type", 2);
+        map.put("orderId", id);
+        map.put("content", "订单号: " + orders.getNumber());
+        webSocketServer.sendMessageToAll(JSON.toJSONString(map));
+    }
+
+
+    /**
+     * 用户端订单分页查询
+     *
      * @param pageNum
      * @param pageSize
      * @param status
@@ -181,7 +216,7 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public PageResult pageQuery4User(int pageNum, int pageSize, Integer status) {
         //设置分页
-        PageHelper.startPage(pageNum,pageSize);
+        PageHelper.startPage(pageNum, pageSize);
 
         OrdersPageQueryDTO ordersPageQueryDTO = new OrdersPageQueryDTO();
         ordersPageQueryDTO.setUserId(BaseContext.getCurrentId());
@@ -229,8 +264,6 @@ public class OrderServiceImpl implements OrderService {
 
         return orderVO;
     }
-
-
 
 
     /**
@@ -306,18 +339,20 @@ public class OrderServiceImpl implements OrderService {
 
     /**
      * 订单搜索
+     *
      * @param ordersPageQueryDTO
      * @return
      */
     @Override
     public PageResult conditionSearch(OrdersPageQueryDTO ordersPageQueryDTO) {
         Page<Orders> ordersPage = orderMapper.pageQuery(ordersPageQueryDTO);
-        return new PageResult(ordersPage.getTotal(),ordersPage.getResult());
+        return new PageResult(ordersPage.getTotal(), ordersPage.getResult());
     }
 
 
     /**
      * 取消订单
+     *
      * @param ordersCancelDTO
      */
     @Override
@@ -332,6 +367,7 @@ public class OrderServiceImpl implements OrderService {
 
     /**
      * rejection
+     *
      * @param ordersRejectionDTO
      */
     @Override
@@ -348,6 +384,7 @@ public class OrderServiceImpl implements OrderService {
 
     /**
      * 接单
+     *
      * @param ordersConfirmDTO
      */
     @Override
@@ -362,6 +399,7 @@ public class OrderServiceImpl implements OrderService {
 
     /**
      * 完成订单
+     *
      * @param id
      */
     @Override
@@ -375,6 +413,7 @@ public class OrderServiceImpl implements OrderService {
 
     /**
      * 派送订单
+     *
      * @param id
      */
     @Override
@@ -388,6 +427,7 @@ public class OrderServiceImpl implements OrderService {
 
     /**
      * 各个状态的订单数量统计
+     *
      * @return
      */
     @Override
